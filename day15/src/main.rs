@@ -47,13 +47,13 @@ struct Grid {
 }
 
 impl Grid {
-    fn calc_index(&self, x: u32, y: u32) -> usize {
-        let index = y * self.size.y + x;
+    fn calc_index(&self, x: usize, y: usize) -> usize {
+        let index = (y as u32) * self.size.y + (x as u32);
         index as usize
     }
 
-    fn get(&self, x: u32, y: u32) -> Result<&Cell, &'static str> {
-        if x >= self.size.x || y >= self.size.y {
+    fn get(&self, x: usize, y: usize) -> Result<&Cell, &'static str> {
+        if (x as u32) >= self.size.x || (y as u32) >= self.size.y {
             Err("Index out of grid bounds")
         } else {
             let cell = self.data.get(self.calc_index(x, y)).unwrap();
@@ -61,11 +61,12 @@ impl Grid {
         }
     }
 
-    fn set(&mut self, x: u32, y: u32, value: Cell) -> bool {
-        if x >= self.size.x || y >= self.size.y {
+    fn set(&mut self, x: usize, y: usize, value: Cell) -> bool {
+        if (x as u32) >= self.size.x || (y as u32) >= self.size.y {
             false
         } else {
-            self.data[self.calc_index(x, y)] = value;
+            let index = self.calc_index(x, y);
+            self.data[index] = value;
             true
         }
     }
@@ -77,11 +78,35 @@ impl FromStr for Grid {
     fn from_str(input: &str) -> Result<Grid, Self::Err> {
         let lines = input.split("\n");
 
-        Ok(Grid {
+        let mut grid = Grid {
             size: Vec2 { x: 0, y: 0 },
             data: Vec::new(),
             player_position: Vec2 { x: 0, y: 0 },
-        })
+        };
+
+        for (y, line) in lines.into_iter().enumerate() {
+            for x in 0..line.len() {
+                let cell_string = line.chars().nth(x).unwrap().to_string();
+                grid.set(x,y,Cell::from_str(&cell_string).unwrap());
+            }
+        }
+
+        Ok(grid)
+    }
+}
+
+impl ToString for Grid {
+    fn to_string(&self) -> String {
+        let mut string = String::from("");
+
+        for y in 0..self.size.y {
+            for x in 0..self.size.x {
+                string += &self.get(x as usize, y as usize).unwrap().to_string();
+            }
+            string += "\n";
+        }
+
+        string
     }
 }
 
