@@ -1,4 +1,4 @@
-use std::{fs, str::FromStr, usize};
+use std::{fs, io::Chain, str::FromStr, usize};
 
 const INPUT_FILE_PATH: &str = "./input_smol";
 
@@ -9,6 +9,7 @@ struct Move {
     y: i32,
 }
 
+#[derive(Clone)]
 struct Vec2 {
     x: usize,
     y: usize,
@@ -72,28 +73,60 @@ impl Board {
     }
 
     fn attempt_move_player(&mut self, player_move: Move) {
-        let new_player_x = (self.player_position.x as i32 + player_move.x) as usize;
-        let new_player_y = (self.player_position.y as i32 + player_move.y) as usize;
-
-        let next_cell = self.get(new_player_x, new_player_y).unwrap();
+        let new_pos = Board::add_vec_to_move(&self.player_position, &player_move);
+        let next_cell = self.get(new_pos.x, new_pos.y).unwrap();
 
         match next_cell {
             Cell::PLAYER => panic!("Something went terribly wrong"),
             Cell::EMPTY => {
                 self.set(self.player_position.x, self.player_position.y, Cell::EMPTY);
-                self.set(new_player_x, new_player_y, Cell::PLAYER);
-
-                self.player_position.x = new_player_x;
-                self.player_position.y = new_player_y;
+                self.set(new_pos.x, new_pos.y, Cell::PLAYER);
+                self.player_position = new_pos;
 
                 println!("Moved player")
             }
             Cell::BOX => {
-                println!("Todo")
+                let chain_length = self.get_movable_box_chain_length(&new_pos, &player_move, 0);
+
+                if chain_length > 0 {
+                    self.set(self.player_position.x, self.player_position.y, Cell::EMPTY);
+                    self.set(new_pos.x, new_pos.y, Cell::PLAYER);
+                    self.player_position = new_pos.clone();
+                }
+
+                let mut end_of_chain = new_pos.clone();
+
+                for _ in 0..chain_length {
+                    end_of_chain = Board::add_vec_to_move(&end_of_chain, &player_move);
+                }
+
+                self.set(end_of_chain.x, end_of_chain.y, Cell::BOX);
+
+                println!("Moving chain: {}", chain_length)
             }
             Cell::WALL => {
                 println!("Wall collision")
             }
+        }
+    }
+
+    fn add_vec_to_move(vec: &Vec2, mv: &Move) -> Vec2 {
+        Vec2 {
+            x: (vec.x as i32 + mv.x) as usize,
+            y: (vec.y as i32 + mv.y) as usize,
+        }
+    }
+
+    fn get_movable_box_chain_length(&self, current: &Vec2, move_vector: &Move, count: i32) -> i32 {
+        let current_cell = self.get(current.x, current.y).unwrap();
+
+        let next_position = Board::add_vec_to_move(&current, &move_vector);
+
+        match current_cell {
+            Cell::WALL => 0,
+            Cell::PLAYER => panic!("Something went terribly wrong"),
+            Cell::BOX => self.get_movable_box_chain_length(&next_position, &move_vector, count + 1),
+            Cell::EMPTY => count,
         }
     }
 
