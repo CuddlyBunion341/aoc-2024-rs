@@ -1,6 +1,6 @@
 use std::{fs, io::Chain, str::FromStr, usize};
 
-const INPUT_FILE_PATH: &str = "./input_smol";
+const INPUT_FILE_PATH: &str = "./input";
 
 #[derive(Debug)]
 struct Move {
