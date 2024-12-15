@@ -1,8 +1,8 @@
 use std::{fs, str::FromStr, usize};
 
 struct Vec2 {
-    x: u32,
-    y: u32,
+    x: usize,
+    y: usize,
 }
 
 #[derive(Clone)]
@@ -55,20 +55,20 @@ impl Board {
         Board {
             data,
             size: Vec2 {
-                x: width as u32,
-                y: height as u32,
+                x: width,
+                y: height,
             },
             player_position: Vec2 { x: 0, y: 0 },
         }
     }
 
     fn calc_index(&self, x: usize, y: usize) -> usize {
-        let index = (y as u32) * self.size.y + (x as u32);
+        let index = y * self.size.y + x;
         index as usize
     }
 
     fn get(&self, x: usize, y: usize) -> Result<&Cell, &'static str> {
-        if (x as u32) >= self.size.x || (y as u32) >= self.size.y {
+        if x >= self.size.x || y >= self.size.y {
             Err("Index out of grid bounds")
         } else {
             let cell = self.data.get(self.calc_index(x, y)).unwrap();
@@ -77,7 +77,7 @@ impl Board {
     }
 
     fn set(&mut self, x: usize, y: usize, value: Cell) -> bool {
-        if (x as u32) >= self.size.x || (y as u32) >= self.size.y {
+        if x >= self.size.x || y >= self.size.y {
             false
         } else {
             let index = self.calc_index(x, y);
