@@ -40,13 +40,13 @@ impl FromStr for Cell {
     }
 }
 
-struct Grid {
+struct Board {
     size: Vec2,
     data: Vec<Cell>,
     player_position: Vec2,
 }
 
-impl Grid {
+impl Board {
     fn calc_index(&self, x: usize, y: usize) -> usize {
         let index = (y as u32) * self.size.y + (x as u32);
         index as usize
@@ -72,13 +72,13 @@ impl Grid {
     }
 }
 
-impl FromStr for Grid {
+impl FromStr for Board {
     type Err = ();
 
-    fn from_str(input: &str) -> Result<Grid, Self::Err> {
+    fn from_str(input: &str) -> Result<Board, Self::Err> {
         let lines = input.split("\n");
 
-        let mut grid = Grid {
+        let mut grid = Board {
             size: Vec2 { x: 0, y: 0 },
             data: Vec::new(),
             player_position: Vec2 { x: 0, y: 0 },
@@ -95,7 +95,7 @@ impl FromStr for Grid {
     }
 }
 
-impl ToString for Grid {
+impl ToString for Board {
     fn to_string(&self) -> String {
         let mut string = String::from("");
 
@@ -117,6 +117,8 @@ fn main() {
 
     let board_part = split.next().unwrap();
     let moves_part = split.next().unwrap();
+
+    let board = Board::from_str(board_part);
 
     print!("{}", board_part);
     print!("{}", moves_part);
