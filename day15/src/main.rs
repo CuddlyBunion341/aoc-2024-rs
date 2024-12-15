@@ -118,7 +118,12 @@ impl FromStr for Board {
             for x in 0..line.len() {
                 let cell_string = line.chars().nth(x).unwrap().to_string();
                 let cell = Cell::from_str(&cell_string).unwrap();
-                grid.set(x, y, cell);
+                grid.set(x, y, cell.clone());
+
+                if cell == Cell::PLAYER {
+                    grid.player_position.x = x;
+                    grid.player_position.y = y;
+                }
             }
         }
 
