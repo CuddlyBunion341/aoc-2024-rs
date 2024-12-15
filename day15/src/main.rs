@@ -1,5 +1,10 @@
 use std::{fs, str::FromStr, usize};
 
+struct Move {
+    x: i32,
+    y: i32,
+}
+
 struct Vec2 {
     x: usize,
     y: usize,
@@ -132,6 +137,27 @@ impl ToString for Board {
     }
 }
 
+fn parse_moves(string: &str) -> Vec<Move> {
+    string
+        .chars()
+        .into_iter()
+        .filter_map(|char| match parse_move(char) {
+            Ok(player_move) => Some(player_move),
+            Err(..) => None,
+        })
+        .collect()
+}
+
+fn parse_move(char: char) -> Result<Move, &'static str> {
+    match char {
+        '>' => Ok(Move { x: 1, y: 0 }),
+        '<' => Ok(Move { x: -1, y: 0 }),
+        'v' => Ok(Move { x: 0, y: -1 }),
+        '^' => Ok(Move { x: 0, y: 1 }),
+        _ => Err("Could not parse move"),
+    }
+}
+
 fn main() {
     let contents = fs::read_to_string("./input").expect("Should have been able to read the file");
 
@@ -142,7 +168,4 @@ fn main() {
 
     let board = Board::from_str(board_part).unwrap();
     board.print();
-
-    // print!("{}", board_part);
-    // print!("{}", moves_part);
 }
