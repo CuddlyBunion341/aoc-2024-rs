@@ -1,4 +1,4 @@
-use std::{fs, str::FromStr};
+use std::{fs, str::FromStr, usize};
 
 struct Vec2 {
     x: u32,
@@ -9,17 +9,20 @@ enum Cell {
     PLAYER,
     WALL,
     BOX,
-    EMPTY
+    EMPTY,
 }
 
 impl ToString for Cell {
     fn to_string(&self) -> String {
-        format!("{}", match self {
-            Self::EMPTY => "",
-            Self::BOX => "O",
-            Self::PLAYER => "@",
-            Self::WALL => "#",
-        })
+        format!(
+            "{}",
+            match self {
+                Self::EMPTY => "",
+                Self::BOX => "O",
+                Self::PLAYER => "@",
+                Self::WALL => "#",
+            }
+        )
     }
 }
 
@@ -28,36 +31,38 @@ impl FromStr for Cell {
 
     fn from_str(input: &str) -> Result<Cell, Self::Err> {
         match input {
-            "#"  => Ok(Cell::WALL),
-            "@"  => Ok(Cell::PLAYER),
-            "O"  => Ok(Cell::BOX),
+            "#" => Ok(Cell::WALL),
+            "@" => Ok(Cell::PLAYER),
+            "O" => Ok(Cell::BOX),
             " " => Ok(Cell::EMPTY),
-            _      => Err(()),
+            _ => Err(()),
         }
     }
 }
 
 struct Grid {
+    size: Vec2,
     data: Vec<Vec<Cell>>,
-    player_position: Vec2
+    player_position: Vec2,
 }
 
 impl Grid {
-    fn get(x: u32, y: u32) {
-
+    fn get(&self, x: u32, y: u32) -> Result<&Cell, &'static str> {
+        if x < 0 || x >= self.size.x || y < 0 || y >= self.size.y {
+            Err("Index out of grid bounds")
+        } else {
+            let cell = self.data.get(y as usize).unwrap().get(x as usize).unwrap();
+            Ok(cell)
+        }
     }
 }
 
 fn extract_grid(grid_part: &str) -> Vec<String> {
-    let lines: Vec<String> = grid_part.split("\n").collect();
-
-    lines.collect()
-
+    Vec::new()
 }
 
 fn main() {
-    let contents = fs::read_to_string("./input")
-        .expect("Should have been able to read the file");
+    let contents = fs::read_to_string("./input").expect("Should have been able to read the file");
 
     let mut split = contents.split("\n\n");
 
