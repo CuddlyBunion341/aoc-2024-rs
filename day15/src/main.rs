@@ -130,6 +130,20 @@ impl Board {
         }
     }
 
+    fn get_positions_of_cell_type(&self, cell: &Cell) -> Vec<Vec2> {
+        let mut vector = Vec::new();
+
+        for y in 0..self.size.y {
+            for x in 0..self.size.x {
+                if self.get(x, y).unwrap() == cell {
+                    vector.push(Vec2 { x, y })
+                }
+            }
+        }
+
+        vector
+    }
+
     fn print(&self) {
         print!("{}", self.to_string());
     }
@@ -242,6 +256,10 @@ fn parse_move(char: char) -> Result<Move, &'static str> {
     }
 }
 
+fn gps_coordinates_for_point(point: Vec2) -> i32 {
+    (point.y as i32) * 100 + point.x as i32
+}
+
 fn main() {
     let contents =
         fs::read_to_string(INPUT_FILE_PATH).expect("Should have been able to read the file");
@@ -264,4 +282,15 @@ fn main() {
         board.attempt_move_player(player_move);
         board.print();
     });
+
+    let box_positions = board.get_positions_of_cell_type(&Cell::BOX);
+    let gps_coordinates = box_positions.into_iter().map(|position| {
+        gps_coordinates_for_point(position)
+    });
+
+    let coordinates_sum = gps_coordinates.fold(0, |sum, coordinate| {
+        sum + coordinate
+    });
+
+    println!("Coordinates sum: {}", coordinates_sum);
 }
