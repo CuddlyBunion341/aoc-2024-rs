@@ -1,6 +1,8 @@
 use std::{fs, str::FromStr, usize};
 
+#[derive(Debug)]
 struct Move {
+    repr: char,
     x: i32,
     y: i32,
 }
@@ -150,10 +152,10 @@ fn parse_moves(string: &str) -> Vec<Move> {
 
 fn parse_move(char: char) -> Result<Move, &'static str> {
     match char {
-        '>' => Ok(Move { x: 1, y: 0 }),
-        '<' => Ok(Move { x: -1, y: 0 }),
-        'v' => Ok(Move { x: 0, y: -1 }),
-        '^' => Ok(Move { x: 0, y: 1 }),
+        '>' => Ok(Move { repr: '>', x: 1, y: 0 }),
+        '<' => Ok(Move { repr: '<', x: -1, y: 0 }),
+        'v' => Ok(Move { repr: 'v', x: 0, y: -1 }),
+        '^' => Ok(Move { repr: '^', x: 0, y: 1 }),
         _ => Err("Could not parse move"),
     }
 }
@@ -167,5 +169,10 @@ fn main() {
     let moves_part = split.next().unwrap();
 
     let board = Board::from_str(board_part).unwrap();
-    board.print();
+    let moves = parse_moves(moves_part);
+
+    moves.into_iter().for_each(|player_move| {
+        println!("Move {}:", player_move.repr);
+        board.print();
+    });
 }
