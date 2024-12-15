@@ -1,263 +1,155 @@
-\--- Day 15: Warehouse Woes ---
+\--- Day 14: Restroom Redoubt ---
 ----------
 
-You appear back inside your own mini submarine! Each Historian drives their mini submarine in a different direction; maybe the Chief has his own submarine down here somewhere as well?
+One of The Historians needs to use the bathroom; fortunately, you know there's a bathroom near an unvisited location on their list, and so you're all quickly teleported directly to the lobby of Easter Bunny Headquarters.
 
-You look up to see a vast school of [lanternfish](/2021/day/6) swimming past you. On closer inspection, they seem quite anxious, so you drive your mini submarine over to see if you can help.
+Unfortunately, EBHQ seems to have "improved" bathroom security *again* after your last [visit](/2016/day/2). The area outside the bathroom is swarming with robots!
 
-Because lanternfish populations grow rapidly, they need a lot of food, and that food needs to be stored somewhere. That's why these lanternfish have built elaborate warehouse complexes operated by robots!
+To get The Historian safely to the bathroom, you'll need a way to predict where the robots will be in the future. Fortunately, they all seem to be moving on the tile floor in predictable *straight lines*.
 
-These lanternfish seem so anxious because they have lost control of the robot that operates one of their most important warehouses! It is currently running amok, pushing around boxes in the warehouse with no regard for lanternfish logistics *or* lanternfish inventory management strategies.
-
-Right now, none of the lanternfish are brave enough to swim up to an unpredictable robot so they could shut it off. However, if you could anticipate the robot's movements, maybe they could find a safe option.
-
-The lanternfish already have a map of the warehouse and a list of movements the robot will *attempt* to make (your puzzle input). The problem is that the movements will sometimes fail as boxes are shifted around, making the actual movements of the robot difficult to predict.
-
-For example:
+You make a list (your puzzle input) of all of the robots' current *positions* (`p`) and *velocities* (`v`), one robot per line. For example:
 
 ```
-##########
-#..O..O.O#
-#......O.#
-#.OO..O.O#
-#..O@..O.#
-#O#..O...#
-#O..O..O.#
-#.OO.O.OO#
-#....O...#
-##########
-
-<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
-vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
-><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
-<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
-^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
-^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
->^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
-<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
-^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
-v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
+p=0,4 v=3,-3
+p=6,3 v=-1,-3
+p=10,3 v=-1,2
+p=2,0 v=2,-1
+p=0,0 v=1,3
+p=3,0 v=-2,-2
+p=7,6 v=-1,-3
+p=3,0 v=-1,-2
+p=9,3 v=2,3
+p=7,3 v=-1,2
+p=2,4 v=2,-3
+p=9,5 v=-3,-3
 
 ```
 
-As the robot (`@`) attempts to move, if there are any boxes (`O`) in the way, the robot will also attempt to push those boxes. However, if this action would cause the robot or a box to move into a wall (`#`), nothing moves instead, including the robot. The initial positions of these are shown on the map at the top of the document the lanternfish gave you.
+Each robot's position is given as `p=x,y` where `x` represents the number of tiles the robot is from the left wall and `y` represents the number of tiles from the top wall (when viewed from above). So, a position of `p=0,0` means the robot is all the way in the top-left corner.
 
-The rest of the document describes the *moves* (`^` for up, `v` for down, `<` for left, `>` for right) that the robot will attempt to make, in order. (The moves form a single giant sequence; they are broken into multiple lines just to make copy-pasting easier. Newlines within the move sequence should be ignored.)
+Each robot's velocity is given as `v=x,y` where `x` and `y` are given in *tiles per second*. Positive `x` means the robot is moving to the *right*, and positive `y` means the robot is moving *down*. So, a velocity of `v=1,-2` means that each second, the robot moves `1` tile to the right and `2` tiles up.
 
-Here is a smaller example to get started:
+The robots outside the actual bathroom are in a space which is `101` tiles wide and `103` tiles tall (when viewed from above). However, in this example, the robots are in a space which is only `11` tiles wide and `7` tiles tall.
 
-```
-########
-#..O.O.#
-##@.O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
-
-<^^>>>vv<v>>v<<
+The robots are good at navigating over/under each other (due to a combination of springs, extendable legs, and quadcopters), so they can share the same tile and don't interact with each other. Visually, the number of robots on each tile in this example looks like this:
 
 ```
+1.12.......
+...........
+...........
+......11.11
+1.1........
+.........1.
+.......1...
 
-Were the robot to attempt the given sequence of moves, it would push around the boxes as follows:
+```
+
+These robots have a unique feature for maximum bathroom security: they can *teleport*. When a robot would run into an edge of the space they're in, they instead *teleport to the other side*, effectively wrapping around the edges. Here is what robot `p=2,4 v=2,-3` does for the first few seconds:
 
 ```
 Initial state:
-########
-#..O.O.#
-##@.O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+...........
+...........
+...........
+...........
+..1........
+...........
+...........
 
-Move <:
-########
-#..O.O.#
-##@.O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+After 1 second:
+...........
+....1......
+...........
+...........
+...........
+...........
+...........
 
-Move ^:
-########
-#.@O.O.#
-##..O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+After 2 seconds:
+...........
+...........
+...........
+...........
+...........
+......1....
+...........
 
-Move ^:
-########
-#.@O.O.#
-##..O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+After 3 seconds:
+...........
+...........
+........1..
+...........
+...........
+...........
+...........
 
-Move >:
-########
-#..@OO.#
-##..O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+After 4 seconds:
+...........
+...........
+...........
+...........
+...........
+...........
+..........1
 
-Move >:
-########
-#...@OO#
-##..O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
-
-Move >:
-########
-#...@OO#
-##..O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
-
-Move v:
-########
-#....OO#
-##..@..#
-#...O..#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move v:
-########
-#....OO#
-##..@..#
-#...O..#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move <:
-########
-#....OO#
-##.@...#
-#...O..#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move v:
-########
-#....OO#
-##.....#
-#..@O..#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move >:
-########
-#....OO#
-##.....#
-#...@O.#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move >:
-########
-#....OO#
-##.....#
-#....@O#
-#.#.O..#
-#...O..#
-#...O..#
-########
-
-Move v:
-########
-#....OO#
-##.....#
-#.....O#
-#.#.O@.#
-#...O..#
-#...O..#
-########
-
-Move <:
-########
-#....OO#
-##.....#
-#.....O#
-#.#O@..#
-#...O..#
-#...O..#
-########
-
-Move <:
-########
-#....OO#
-##.....#
-#.....O#
-#.#O@..#
-#...O..#
-#...O..#
-########
+After 5 seconds:
+...........
+...........
+...........
+.1.........
+...........
+...........
+...........
 
 ```
 
-The larger example has many more moves; after the robot has finished those moves, the warehouse would look like this:
+The Historian can't wait much longer, so you don't have to simulate the robots for very long. Where will the robots be after `100` seconds?
+
+In the above example, the number of robots on each tile after 100 seconds has elapsed looks like this:
 
 ```
-##########
-#.O.O.OOO#
-#........#
-#OO......#
-#OO@.....#
-#O#.....O#
-#O.....OO#
-#O.....OO#
-#OO....OO#
-##########
-
-```
-
-The lanternfish use their own custom Goods Positioning System (GPS for short) to track the locations of the boxes. The *GPS coordinate* of a box is equal to 100 times its distance from the top edge of the map plus its distance from the left edge of the map. (This process does not stop at wall tiles; measure all the way to the edges of the map.)
-
-So, the box shown below has a distance of `1` from the top edge of the map and `4` from the left edge of the map, resulting in a GPS coordinate of `100 * 1 + 4 = 104`.
-
-```
-#######
-#...O..
-#......
+......2..1.
+...........
+1..........
+.11........
+.....1.....
+...12......
+.1....1....
 
 ```
 
-The lanternfish would like to know the *sum of all boxes' GPS coordinates* after the robot finishes moving. In the larger example, the sum of all boxes' GPS coordinates is `*10092*`. In the smaller example, the sum is `*2028*`.
+To determine the safest area, count the *number of robots in each quadrant* after 100 seconds. Robots that are exactly in the middle (horizontally or vertically) don't count as being in any quadrant, so the only relevant robots are:
 
-Predict the motion of the robot and boxes in the warehouse. After the robot is finished moving, *what is the sum of all boxes' GPS coordinates?*
+```
+..... 2..1.
+..... .....
+1.... .....
 
-To begin, [get your puzzle input](15/input).
+..... .....
+...12 .....
+.1... 1....
 
-Answer:
+```
 
-You can also [Shareon [Bluesky](https://bsky.app/intent/compose?text=%22Warehouse+Woes%22+%2D+Day+15+%2D+Advent+of+Code+2024+%23AdventOfCode+https%3A%2F%2Fadventofcode%2Ecom%2F2024%2Fday%2F15) [Twitter](https://twitter.com/intent/tweet?text=%22Warehouse+Woes%22+%2D+Day+15+%2D+Advent+of+Code+2024&url=https%3A%2F%2Fadventofcode%2Ecom%2F2024%2Fday%2F15&related=ericwastl&hashtags=AdventOfCode) [Mastodon](javascript:void(0);)] this puzzle.
+In this example, the quadrants contain `1`, `3`, `4`, and `1` robot. Multiplying these together gives a total *safety factor* of `*12*`.
+
+Predict the motion of the robots in your list within a space which is `101` tiles wide and `103` tiles tall. *What will the safety factor be after exactly 100 seconds have elapsed?*
+
+Your puzzle answer was `211692000`.
+
+\--- Part Two ---
+----------
+
+During the bathroom break, someone notices that these robots seem awfully similar to ones built and used at the North Pole. If they're the same type of robots, they should have a hard-coded Easter egg: very rarely, most of the robots should arrange themselves into *a picture of a Christmas tree*.
+
+*What is the fewest number of seconds that must elapse for the robots to display the Easter egg?*
+
+Your puzzle answer was `6587`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](/2024) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](14/input).
+
+You can also [Shareon [Bluesky](https://bsky.app/intent/compose?text=I%27ve+completed+%22Restroom+Redoubt%22+%2D+Day+14+%2D+Advent+of+Code+2024+%23AdventOfCode+https%3A%2F%2Fadventofcode%2Ecom%2F2024%2Fday%2F14) [Twitter](https://twitter.com/intent/tweet?text=I%27ve+completed+%22Restroom+Redoubt%22+%2D+Day+14+%2D+Advent+of+Code+2024&url=https%3A%2F%2Fadventofcode%2Ecom%2F2024%2Fday%2F14&related=ericwastl&hashtags=AdventOfCode) [Mastodon](javascript:void(0);)] this puzzle.
