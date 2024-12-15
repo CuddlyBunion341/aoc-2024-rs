@@ -48,11 +48,21 @@ struct Grid {
 
 impl Grid {
     fn get(&self, x: u32, y: u32) -> Result<&Cell, &'static str> {
-        if x < 0 || x >= self.size.x || y < 0 || y >= self.size.y {
+        if x >= self.size.x || y >= self.size.y {
             Err("Index out of grid bounds")
         } else {
             let cell = self.data.get(y as usize).unwrap().get(x as usize).unwrap();
             Ok(cell)
+        }
+    }
+
+    fn set(&mut self, x: u32, y: u32, value: Cell) -> bool {
+
+        if x >= self.size.x || y >= self.size.y {
+           false
+        } else {
+            let vec = self.data.get(y as usize);
+            vec.unwrap().write(x, value);
         }
     }
 }
