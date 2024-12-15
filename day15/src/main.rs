@@ -1,4 +1,4 @@
-use std::{fs, io::Chain, str::FromStr, usize};
+use std::{fs, str::FromStr, usize};
 
 const INPUT_FILE_PATH: &str = "./input";
 
@@ -64,10 +64,7 @@ impl Board {
 
         Board {
             data,
-            size: Vec2 {
-                x: width,
-                y: height,
-            },
+            size: Vec2 { x: width, y: height },
             player_position: Vec2 { x: 0, y: 0 },
         }
     }
@@ -232,26 +229,10 @@ fn parse_moves(string: &str) -> Vec<Move> {
 
 fn parse_move(char: char) -> Result<Move, &'static str> {
     match char {
-        '>' => Ok(Move {
-            repr: '>',
-            x: 1,
-            y: 0,
-        }),
-        '<' => Ok(Move {
-            repr: '<',
-            x: -1,
-            y: 0,
-        }),
-        'v' => Ok(Move {
-            repr: 'v',
-            x: 0,
-            y: 1,
-        }),
-        '^' => Ok(Move {
-            repr: '^',
-            x: 0,
-            y: -1,
-        }),
+        '>' => Ok(Move { repr: '>', x: 1,  y: 0  }),
+        '<' => Ok(Move { repr: '<', x: -1, y: 0  }),
+        'v' => Ok(Move { repr: 'v', x: 0,  y: 1  }),
+        '^' => Ok(Move { repr: '^', x: 0,  y: -1 }),
         _ => Err("Could not parse move"),
     }
 }
@@ -284,13 +265,11 @@ fn main() {
     });
 
     let box_positions = board.get_positions_of_cell_type(&Cell::BOX);
-    let gps_coordinates = box_positions.into_iter().map(|position| {
-        gps_coordinates_for_point(position)
-    });
+    let gps_coordinates = box_positions
+        .into_iter()
+        .map(|position| gps_coordinates_for_point(position));
 
-    let coordinates_sum = gps_coordinates.fold(0, |sum, coordinate| {
-        sum + coordinate
-    });
+    let coordinates_sum = gps_coordinates.fold(0, |sum, coordinate| sum + coordinate);
 
     println!("Coordinates sum: {}", coordinates_sum);
 }
