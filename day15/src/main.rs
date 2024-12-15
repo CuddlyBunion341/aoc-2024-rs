@@ -71,6 +71,32 @@ impl Board {
         }
     }
 
+    fn attempt_move_player(&mut self, player_move: Move) {
+        let new_player_x = (self.player_position.x as i32 + player_move.x) as usize;
+        let new_player_y = (self.player_position.y as i32 + player_move.y) as usize;
+
+        let next_cell = self.get(new_player_x, new_player_y).unwrap();
+
+        match next_cell {
+            Cell::PLAYER => panic!("Something went terribly wrong"),
+            Cell::EMPTY => {
+                self.set(self.player_position.x, self.player_position.y, Cell::EMPTY);
+                self.set(new_player_x, new_player_y, Cell::PLAYER);
+
+                self.player_position.x = new_player_x;
+                self.player_position.y = new_player_y;
+
+                println!("Moved player")
+            }
+            Cell::BOX => {
+                println!("Todo")
+            }
+            Cell::WALL => {
+                println!("Wall collision")
+            }
+        }
+    }
+
     fn print(&self) {
         print!("{}", self.to_string());
     }
@@ -159,23 +185,40 @@ fn parse_moves(string: &str) -> Vec<Move> {
 
 fn parse_move(char: char) -> Result<Move, &'static str> {
     match char {
-        '>' => Ok(Move { repr: '>', x: 1, y: 0 }),
-        '<' => Ok(Move { repr: '<', x: -1, y: 0 }),
-        'v' => Ok(Move { repr: 'v', x: 0, y: -1 }),
-        '^' => Ok(Move { repr: '^', x: 0, y: 1 }),
+        '>' => Ok(Move {
+            repr: '>',
+            x: 1,
+            y: 0,
+        }),
+        '<' => Ok(Move {
+            repr: '<',
+            x: -1,
+            y: 0,
+        }),
+        'v' => Ok(Move {
+            repr: 'v',
+            x: 0,
+            y: 1,
+        }),
+        '^' => Ok(Move {
+            repr: '^',
+            x: 0,
+            y: -1,
+        }),
         _ => Err("Could not parse move"),
     }
 }
 
 fn main() {
-    let contents = fs::read_to_string(INPUT_FILE_PATH).expect("Should have been able to read the file");
+    let contents =
+        fs::read_to_string(INPUT_FILE_PATH).expect("Should have been able to read the file");
 
     let mut split = contents.split("\n\n");
 
     let board_part = split.next().unwrap();
     let moves_part = split.next().unwrap();
 
-    let board = Board::from_str(board_part).unwrap();
+    let mut board = Board::from_str(board_part).unwrap();
     let moves = parse_moves(moves_part);
 
     println!("");
@@ -185,6 +228,7 @@ fn main() {
     moves.into_iter().for_each(|player_move| {
         println!("");
         println!("Move {}:", player_move.repr);
+        board.attempt_move_player(player_move);
         board.print();
     });
 }
