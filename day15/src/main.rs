@@ -5,7 +5,7 @@ struct Vec2 {
     y: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 enum Cell {
     PLAYER,
     WALL,
@@ -18,7 +18,7 @@ impl ToString for Cell {
         format!(
             "{}",
             match self {
-                Self::EMPTY => "",
+                Self::EMPTY => ".",
                 Self::BOX => "O",
                 Self::PLAYER => "@",
                 Self::WALL => "#",
@@ -50,7 +50,7 @@ struct Board {
 impl Board {
     fn new(width: usize, height: usize) -> Board {
         let mut data = Vec::with_capacity(width * height);
-        data.fill(Cell::EMPTY);
+        data.resize(width * height, Cell::EMPTY);
 
         Board {
             data,
@@ -62,6 +62,10 @@ impl Board {
         }
     }
 
+    fn print(&self) {
+        print!("{}", self.to_string());
+    }
+
     fn calc_index(&self, x: usize, y: usize) -> usize {
         let index = y * self.size.y + x;
         index as usize
@@ -71,7 +75,8 @@ impl Board {
         if x >= self.size.x || y >= self.size.y {
             Err("Index out of grid bounds")
         } else {
-            let cell = self.data.get(self.calc_index(x, y)).unwrap();
+            let index = self.calc_index(x, y);
+            let cell = self.data.get(index).unwrap();
             Ok(cell)
         }
     }
@@ -100,12 +105,9 @@ impl FromStr for Board {
 
         let mut grid = Board::new(width, height);
 
-        print!("{}", grid.to_string());
-
         for (y, line) in lines.into_iter().enumerate() {
             for x in 0..line.len() {
                 let cell_string = line.chars().nth(x).unwrap().to_string();
-                print!("{}", cell_string);
                 let cell = Cell::from_str(&cell_string).unwrap();
                 grid.set(x, y, cell);
             }
@@ -121,7 +123,7 @@ impl ToString for Board {
 
         for y in 0..self.size.y {
             for x in 0..self.size.x {
-                string += &self.get(x as usize, y as usize).unwrap().to_string();
+                string += &self.get(x, y).unwrap().to_string();
             }
             string += "\n";
         }
@@ -139,8 +141,8 @@ fn main() {
     let moves_part = split.next().unwrap();
 
     let board = Board::from_str(board_part).unwrap();
-    print!("{}", board.to_string());
+    board.print();
 
-    print!("{}", board_part);
-    print!("{}", moves_part);
+    // print!("{}", board_part);
+    // print!("{}", moves_part);
 }
