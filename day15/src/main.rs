@@ -42,33 +42,47 @@ impl FromStr for Cell {
 
 struct Grid {
     size: Vec2,
-    data: Vec<Vec<Cell>>,
+    data: Vec<Cell>,
     player_position: Vec2,
 }
 
 impl Grid {
+    fn calc_index(&self, x: u32, y: u32) -> usize {
+        let index = y * self.size.y + x;
+        index as usize
+    }
+
     fn get(&self, x: u32, y: u32) -> Result<&Cell, &'static str> {
         if x >= self.size.x || y >= self.size.y {
             Err("Index out of grid bounds")
         } else {
-            let cell = self.data.get(y as usize).unwrap().get(x as usize).unwrap();
+            let cell = self.data.get(self.calc_index(x, y)).unwrap();
             Ok(cell)
         }
     }
 
     fn set(&mut self, x: u32, y: u32, value: Cell) -> bool {
-
         if x >= self.size.x || y >= self.size.y {
-           false
+            false
         } else {
-            let vec = self.data.get(y as usize);
-            vec.unwrap().write(x, value);
+            self.data[self.calc_index(x, y)] = value;
+            true
         }
     }
 }
 
-fn extract_grid(grid_part: &str) -> Vec<String> {
-    Vec::new()
+impl FromStr for Grid {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Grid, Self::Err> {
+        let lines = input.split("\n");
+
+        Ok(Grid {
+            size: Vec2 { x: 0, y: 0 },
+            data: Vec::new(),
+            player_position: Vec2 { x: 0, y: 0 },
+        })
+    }
 }
 
 fn main() {
