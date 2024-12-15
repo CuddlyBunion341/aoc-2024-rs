@@ -1,5 +1,7 @@
 use std::{fs, str::FromStr, usize};
 
+const INPUT_FILE_PATH: &str = "./input_smol";
+
 #[derive(Debug)]
 struct Move {
     repr: char,
@@ -161,7 +163,7 @@ fn parse_move(char: char) -> Result<Move, &'static str> {
 }
 
 fn main() {
-    let contents = fs::read_to_string("./input").expect("Should have been able to read the file");
+    let contents = fs::read_to_string(INPUT_FILE_PATH).expect("Should have been able to read the file");
 
     let mut split = contents.split("\n\n");
 
@@ -171,7 +173,12 @@ fn main() {
     let board = Board::from_str(board_part).unwrap();
     let moves = parse_moves(moves_part);
 
+    println!("");
+    println!("Initial state:");
+    board.print();
+
     moves.into_iter().for_each(|player_move| {
+        println!("");
         println!("Move {}:", player_move.repr);
         board.print();
     });
