@@ -5,6 +5,7 @@ struct Vec2 {
     y: u32,
 }
 
+#[derive(Clone)]
 enum Cell {
     PLAYER,
     WALL,
@@ -34,7 +35,7 @@ impl FromStr for Cell {
             "#" => Ok(Cell::WALL),
             "@" => Ok(Cell::PLAYER),
             "O" => Ok(Cell::BOX),
-            " " => Ok(Cell::EMPTY),
+            "." => Ok(Cell::EMPTY),
             _ => Err(()),
         }
     }
@@ -47,6 +48,20 @@ struct Board {
 }
 
 impl Board {
+    fn new(width: usize, height: usize) -> Board {
+        let mut data = Vec::with_capacity(width * height);
+        data.fill(Cell::EMPTY);
+
+        Board {
+            data,
+            size: Vec2 {
+                x: width as u32,
+                y: height as u32,
+            },
+            player_position: Vec2 { x: 0, y: 0 },
+        }
+    }
+
     fn calc_index(&self, x: usize, y: usize) -> usize {
         let index = (y as u32) * self.size.y + (x as u32);
         index as usize
@@ -78,16 +93,21 @@ impl FromStr for Board {
     fn from_str(input: &str) -> Result<Board, Self::Err> {
         let lines = input.split("\n");
 
-        let mut grid = Board {
-            size: Vec2 { x: 0, y: 0 },
-            data: Vec::new(),
-            player_position: Vec2 { x: 0, y: 0 },
-        };
+        let lines2: Vec<&str> = lines.clone().into_iter().collect();
+        let height = lines2.len();
+
+        let width = lines2.first().unwrap().len();
+
+        let mut grid = Board::new(width, height);
+
+        print!("{}", grid.to_string());
 
         for (y, line) in lines.into_iter().enumerate() {
             for x in 0..line.len() {
                 let cell_string = line.chars().nth(x).unwrap().to_string();
-                grid.set(x,y,Cell::from_str(&cell_string).unwrap());
+                print!("{}", cell_string);
+                let cell = Cell::from_str(&cell_string).unwrap();
+                grid.set(x, y, cell);
             }
         }
 
@@ -118,7 +138,8 @@ fn main() {
     let board_part = split.next().unwrap();
     let moves_part = split.next().unwrap();
 
-    let board = Board::from_str(board_part);
+    let board = Board::from_str(board_part).unwrap();
+    print!("{}", board.to_string());
 
     print!("{}", board_part);
     print!("{}", moves_part);
