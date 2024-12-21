@@ -40,13 +40,48 @@ struct Memory {
 }
 
 impl Memory {
+    pub fn new(width: i32, height: i32) -> Memory {
+        let mut safe = Vec::new();
+        for _ in 0..height {
+            let mut row = Vec::new();
+            for _ in 0..width {
+                row.push(false);
+            }
+            safe.push(row);
+        }
+
+        Memory {
+            safe
+        }
+    }
+
     pub fn get(&self, x: usize, y: usize) -> bool {
         self.safe[y][x]
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, value: bool) {
+        self.safe[y][x] = value
+    }
+}
+
+impl FromStr for Memory {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lines: Vec<&str> = s.split("\n").collect();
+
+        let x = lines.len();
+        let y = lines.first().unwrap().len();
+
+        Ok(Memory::new(x.try_into().unwrap(),y.try_into().unwrap()))
     }
 }
 
 fn main() {
     let file = fs::read_to_string("./input");
-    let positions = parse_positions(&file.unwrap());
+    let input = file.unwrap();
+    let positions = parse_positions(&input);
     print!("{}",positions.len());
+
+    let memory = Memory::from_str(&input);
 }
