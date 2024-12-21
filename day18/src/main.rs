@@ -85,8 +85,13 @@ fn main() {
     let file = fs::read_to_string("./input_smol");
     let input = file.unwrap();
     let positions = parse_positions(&input);
-    print!("{}", positions.len());
+    println!("{}", positions.len());
 
-    let memory = Memory::new(6, 6);
-    print!("{}", memory.to_string())
+    let mut memory = Memory::new(7, 7);
+    
+    positions.into_iter().for_each(|position| {
+        memory.set(position.x, position.y, false);
+    });
+
+    println!("{}", memory.to_string());
 }
