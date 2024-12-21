@@ -1,5 +1,6 @@
 use std::{fs, io::stdout, str::FromStr};
 
+#[derive(Clone)]
 struct Pos {
     x: usize,
     y: usize,
@@ -54,7 +55,13 @@ impl Memory {
     }
 
     pub fn get(&self, x: usize, y: usize) -> bool {
-        self.safe[y][x]
+        if y > self.safe.len() {
+            false
+        } else if x > self.safe.first().unwrap().len() {
+            false
+        } else {
+            self.safe[y][x]
+        }
     }
 
     pub fn set(&mut self, x: usize, y: usize, value: bool) {
@@ -71,7 +78,7 @@ impl ToString for Memory {
                 let cell = self.get(x, y);
                 output += match cell {
                     true => ".",
-                    false => "#"
+                    false => "#",
                 }
             }
 
@@ -82,21 +89,52 @@ impl ToString for Memory {
 }
 
 fn solve_maze(start: &Pos, stop: &Pos, memory: &Memory) -> Vec<Pos> {
-    let current = Pos {x: start.x, y: start.y};
+    let current = Pos {
+        x: start.x,
+        y: start.y,
+    };
     let visited = Vec::new();
 
     solve(visited, &current, &stop, &memory)
 }
 
-fn solve(visited: Vec<Pos>, current: &Pos, stop: &Pos, memory: &Memory) -> Vec<Pos> {
-    let cost_up = 10;
-    let cost_down = 1;
-    let cost_left = 10;
-    let cost_right = 1;
+fn vec_includes_pos(vec: Vec<Pos>, pos: &Pos) -> bool {
+    vec.into_iter().fold(false, |acc,val| {
+        acc || (val.x == pos.x && val.y == pos.y)
+    })
+}
 
+fn solve(visited: Vec<Pos>, current: &Pos, stop: &Pos, memory: &Memory) -> Vec<Pos> {
     if current.x == stop.x && current.y == stop.y {
         return visited;
     }
+
+    if memory.get(current.x, current.y) {
+        return visited;
+    }
+
+    let mut visited = visited.clone();
+    visited.push(current.clone());
+
+    solve(
+        visited.clone(),
+        &Pos {
+            x: current.x + 1,
+            y: current.y,
+        },
+        stop,
+        memory,
+    );
+
+    solve(
+        visited.clone(),
+        &Pos {
+            x: current.x,
+            y: current.y + 1,
+        },
+        stop,
+        memory,
+    );
 
     Vec::new()
 }
@@ -110,18 +148,15 @@ fn main() {
     let width = 7;
     let height = 7;
 
-    let starting_position = Pos {
-        x: 0,
-        y: 0,
-    };
+    let starting_position = Pos { x: 0, y: 0 };
 
     let exit_position = Pos {
         x: width - 1,
-        y: height - 1
+        y: height - 1,
     };
 
     let mut memory = Memory::new(width, height);
-    
+
     positions.into_iter().for_each(|position| {
         memory.set(position.x, position.y, false);
     });
@@ -131,6 +166,6 @@ fn main() {
     let steps = solve_maze(&starting_position, &exit_position, &memory);
 
     steps.into_iter().for_each(|step| {
-      print!("{}x{}", step.x, step.y);
+        print!("{}x{}", step.x, step.y);
     });
 }
