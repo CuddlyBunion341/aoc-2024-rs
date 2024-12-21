@@ -1,4 +1,4 @@
-use std::{fs, str::FromStr};
+use std::{fs, io::stdout, str::FromStr};
 
 struct Pos {
     x: usize,
@@ -40,7 +40,7 @@ struct Memory {
 }
 
 impl Memory {
-    pub fn new(width: i32, height: i32) -> Memory {
+    pub fn new(width: usize, height: usize) -> Memory {
         let mut safe = Vec::new();
         for _ in 0..height {
             let mut row = Vec::new();
@@ -81,17 +81,56 @@ impl ToString for Memory {
     }
 }
 
+fn solve_maze(start: &Pos, stop: &Pos, memory: &Memory) -> Vec<Pos> {
+    let current = Pos {x: start.x, y: start.y};
+    let visited = Vec::new();
+
+    solve(visited, &current, &stop, &memory)
+}
+
+fn solve(visited: Vec<Pos>, current: &Pos, stop: &Pos, memory: &Memory) -> Vec<Pos> {
+    let cost_up = 10;
+    let cost_down = 1;
+    let cost_left = 10;
+    let cost_right = 1;
+
+    if current.x == stop.x && current.y == stop.y {
+        return visited;
+    }
+
+    Vec::new()
+}
+
 fn main() {
     let file = fs::read_to_string("./input_smol");
     let input = file.unwrap();
     let positions = parse_positions(&input);
     println!("{}", positions.len());
 
-    let mut memory = Memory::new(7, 7);
+    let width = 7;
+    let height = 7;
+
+    let starting_position = Pos {
+        x: 0,
+        y: 0,
+    };
+
+    let exit_position = Pos {
+        x: width - 1,
+        y: height - 1
+    };
+
+    let mut memory = Memory::new(width, height);
     
     positions.into_iter().for_each(|position| {
         memory.set(position.x, position.y, false);
     });
 
     println!("{}", memory.to_string());
+
+    let steps = solve_maze(&starting_position, &exit_position, &memory);
+
+    steps.into_iter().for_each(|step| {
+      print!("{}x{}", step.x, step.y);
+    });
 }
