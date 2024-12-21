@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, fs, io::stdout, str::FromStr};
+use std::{fs, str::FromStr};
 
 struct Pos {
     x: usize,
@@ -27,12 +27,12 @@ impl FromStr for Pos {
 
 fn parse_positions(input: &str) -> Vec<Pos> {
     let lines = input.split("\n");
-    lines.filter_map(|line| {
-        match Pos::from_str(line) {
+    lines
+        .filter_map(|line| match Pos::from_str(line) {
             Ok(pos) => Some(pos),
             Err(_) => None,
-        }
-    }).collect()
+        })
+        .collect()
 }
 
 struct Memory {
@@ -45,14 +45,12 @@ impl Memory {
         for _ in 0..height {
             let mut row = Vec::new();
             for _ in 0..width {
-                row.push(false);
+                row.push(true);
             }
             safe.push(row);
         }
 
-        Memory {
-            safe
-        }
+        Memory { safe }
     }
 
     pub fn get(&self, x: usize, y: usize) -> bool {
@@ -64,24 +62,31 @@ impl Memory {
     }
 }
 
-impl FromStr for Memory {
-    type Err = String;
+impl ToString for Memory {
+    fn to_string(&self) -> String {
+        let mut output = String::new();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let lines: Vec<&str> = s.split("\n").collect();
+        for y in 0..self.safe.len() {
+            for x in 0..self.safe.first().unwrap().len() {
+                let cell = self.get(x, y);
+                output += match cell {
+                    true => ".",
+                    false => "#"
+                }
+            }
 
-        let x = lines.len();
-        let y = lines.first().unwrap().len();
-
-        Ok(Memory::new(x.try_into().unwrap(),y.try_into().unwrap()))
+            output += "\n"
+        }
+        output
     }
 }
 
 fn main() {
-    let file = fs::read_to_string("./input");
+    let file = fs::read_to_string("./input_smol");
     let input = file.unwrap();
     let positions = parse_positions(&input);
-    print!("{}",positions.len());
+    print!("{}", positions.len());
 
-    let memory = Memory::from_str(&input);
+    let memory = Memory::new(6, 6);
+    print!("{}", memory.to_string())
 }
